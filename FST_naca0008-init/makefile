@@ -1,8 +1,8 @@
-### makefile automatically created by makenek 01/17/2020 15:45:03 ###
+### makefile automatically created by makenek 01/17/2020 16:53:38 ###
 BINNAME=nek5000
 LIBNAME=libnek5000.a
 CASENAME:=FST_naca0008
-CASEDIR:=/scratch/josfa/2D-Case/Mesh/FST_naca0008-init
+CASEDIR:=/scratch/josfa/2DCase/FST_naca0008-init
 S=/scratch/josfa/Nek5000/core
 SCMT=/scratch/josfa/Nek5000/core/cmt
 OPT_INCDIR=./

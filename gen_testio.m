@@ -3,7 +3,7 @@
 %   Generate test for I/O (.u)                                            %
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-addpath('/scratch/nicolo/work/matlab-library/nek/')
+addpath('/scratch/josfa/matlab-tools/nek/')
 clc, close all, clear all
 
 
@@ -11,7 +11,7 @@ clc, close all, clear all
 %% Parameters
 
 % Grid
-gridname = 'wing';
+gridname = 'FST_naca0008';
 nelx = 400;
 nely = 50;
 

@@ -15,10 +15,6 @@ clc, close all, clear all
 gridname = 'FST_naca0008'; runnek = 0; % -> run Nek in gridname-init by yourself because you need the right values in the SIZE file
 
 
-% Initial condition (if none data from grid file)
-% icdata = 'bc_morino/alphaexp-2.5.mat';
-% bldata = 'bc_morino/bl-data.mat';
-
 
 % Simulation
 simname = 'FST_naca0008-base';

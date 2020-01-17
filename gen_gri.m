@@ -59,7 +59,13 @@ nely =  40; % normal to the profile
 
 
 %% Load original profile coordinates
-data = importdata(wingdata); xpro = data(2:end,1)'; ypro = data(2:end,2)'; clear data
+iaf.designation='0008';
+iaf.n=600;
+iaf.HalfCosineSpacing=1;
+iaf.wantFile=1;
+iaf.datFilePath='./'; % Current folder
+iaf.is_finiteTE=0;
+data = naca4gen(iaf); xpro =data.x'; ypro = flip(data.z)'; clear data
 
 % tangential coordinate
 dx = xpro(2:end) - xpro(1:end-1);
@@ -108,7 +114,7 @@ wpr = linspace(fnval(wprfun,scut(1)),fnval(wprfun,scut(2)),nelx+1);
 
 % interpolation
 spr = fnval(wprinv,wpr);
-xpr = fnval(xprfun,spr);
+xpr = fnval(xprfun,spr)
 ypr = fnval(yprfun,spr);
 tpr =[fnval(tprfun{1},spr);
       fnval(tprfun{2},spr)];

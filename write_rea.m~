@@ -1,6 +1,24 @@
-function fid = write_rea(EL,name,dim)
+function fid = write_rea(EL,name,dim,varargin)
 
 bcflag = 0;
+param = init_param;
+
+% -read varargin
+for i = 2:2:length(varargin)
+    switch varargin{i-1}
+        case 'BCfile'
+            bcflag = 1;
+            bcname = varargin{i};
+    end
+end
+
+if mod(length(varargin),2) == 1
+    param = varargin{end};
+    if length(param) ~= 118
+        disp('Error: param has to contain 118 elements')
+        fid = -2; return
+    end
+end
 
 % Dimension check
 if dim ~= 2
