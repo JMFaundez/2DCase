@@ -20,7 +20,6 @@ Re = 5.333333e5;%3.75e6;
 
 % read flow field
 [nekdata,lr1,elmap,~,~,fields,emode,wdsz,etag,hdr] = readnek([gridname,'-init/',gridname,'0.f00001']);
-
 nel = length(elmap);
 load('EL.mat','EL');
 % save GLL points in EL structure
@@ -154,13 +153,11 @@ for iel = 1:nel
 end
 
 % write initial condition file
-status = writenek([simname,'.bc'],nekdata,lr1,elmap,0,0,fields,emode,wdsz,etag);
+status = writenek(['base-torun/',simname,'.bc'],nekdata,lr1,elmap,0,0,fields,emode,wdsz,etag);
 
+write_rea(EL,['base-torun/',simname],2,'BCfile',['base-torun/',simname,'.bc']);
 
-
-write_rea(EL,['base-torun/',simname],2,'BCfile',[simname,'.bc']);
-
-
+status = writenek(['base-torun/',simname,'.bc0.f00001'],nekdata,lr1,elmap,0,0,fields,emode,4,etag);
 
 %% Generate simulation folder
 %system(sprintf('cp %s.bc  ../base-torun',simname));
@@ -173,7 +170,7 @@ write_rea(EL,['base-torun/',simname],2,'BCfile',[simname,'.bc']);
 % system(['rm -r ',gridname,'-init']);
 
 % prepare .ic for visualisation
-status = writenek([simname,'.bc0.f00001'],nekdata,lr1,elmap,0,0,fields,emode,8,etag); % Use 4 instead of 8 if visit version is below 2.10
-system(['visnek ',simname,'.bc']);
+%status = writenek([simname,'bc0.f00001'],nekdata,lr1,elmap,0,0,fields,emode,wdsz,etag); % Use 4 instead of 8 if visit version is below 2.10
+%system(['visnek ',simname,'.bc']);
 
 %clear nekdata
