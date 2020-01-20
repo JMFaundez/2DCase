@@ -1,6 +1,15 @@
-function fid = write_rea(EL,name,dim)
+function fid = write_rea(EL,name,dim, varargin)
 
 bcflag = 0;
+
+% -read varargin
+for i = 2:2:length(varargin)
+    switch varargin{i-1}
+        case 'BCfile'
+            bcflag = 1;
+            bcname = varargin{i};
+    end
+end
 
 % Dimension check
 if dim ~= 2
@@ -12,7 +21,6 @@ nel = length(EL);
 
 % Open file
 fid = fopen([name,'.rea'],'w+');
-
 % Grid
 fprintf(fid,' **MESH DATA** 1st line is X of corner 1,2,3,4. 2nd line is Y.\n');
 fprintf(fid,' %11i %2i %11i           NEL,NDIM,NELV\n',nel,2,nel);

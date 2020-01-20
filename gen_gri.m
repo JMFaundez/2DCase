@@ -1,18 +1,9 @@
+function gen_gri(gridname, nelx, nely,n)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                         %
 %   Generate mesh for wing simulations (lower cut)                        %
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-clc, close all, clear all
-
-
-%% Parameters
-gridname = 'FST_naca0008';
-
-% - profile
-wingdata = 'wing-data/naca0008_CL08_NP628e0_adimensional.dat';
 
 
 % - boundary/initial condition FLUENT data
@@ -52,17 +43,12 @@ wdfrlw = .030; rsfrlw = .010;
 % -- exponent for weight function (how dx is related to the local curvature of the profile)
 rexp = .55;.2;.25;1/2;
 
-% -- number of points for the grid that will be mapped
-nelx = 200;145; % along the profile
-nely =  40; % normal to the profile
-
-
 
 %% Load original profile coordinates
 iaf.designation='0008';
-iaf.n=600;
+iaf.n = n;
 iaf.HalfCosineSpacing=1;
-iaf.wantFile=1;
+iaf.wantFile=0;
 iaf.datFilePath='./'; % Current folder
 iaf.is_finiteTE=0;
 data = naca4gen(iaf); xpro =data.x'; ypro = flip(data.z)'; clear data
@@ -114,7 +100,7 @@ wpr = linspace(fnval(wprfun,scut(1)),fnval(wprfun,scut(2)),nelx+1);
 
 % interpolation
 spr = fnval(wprinv,wpr);
-xpr = fnval(xprfun,spr)
+xpr = fnval(xprfun,spr);
 ypr = fnval(yprfun,spr);
 tpr =[fnval(tprfun{1},spr);
       fnval(tprfun{2},spr)];
@@ -128,7 +114,7 @@ ipr = 1 + 0*xpr;
 
 %% Fringe
 Sfun = @(x) ( 1./(1 + exp(1./(x-1) + 1./x)) ).*(0 < x).*(x < 1) + (1 <= x);
-
+    
 % compute fringe (have a look at SIMSON manual for ref.)
 frpr = Sfun((wdfrup- (spr(end)-spr))/rsfrup) + Sfun((wdfrlw - (spr-spr(1)))/rsfrlw);
 

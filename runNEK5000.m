@@ -1,28 +1,28 @@
-function runNEK5000(gridname)
 
-%% Run NEK5000
-system(['rm -r ',gridname,'-init']);
-system(['mkdir ',gridname,'-init']);
-system('module unload pgi openmpi-pgi');
+clc, close all, clear all
+gridname = 'FST_naca0008';
+%% Load grid
+[xx,yy,ii,uu,vv,pp,fr] = read_grid(gridname); [nely,nelx] = size(xx(2:end,2:end));
+% -- fringe
+stfr = 0.0;
 
-% write rea
-write_rea(EL,[gridname,'-init/',gridname],2);
+% -- boundary conditions for each boundary (W: wall, v: Dirichlet, O: Neumann)
+bc{0+1} = 'E'; % no bc for internal nodes
+bc{1+1} = 'W';
+bc{2+1} = 'o';
+bc{3+1} = 'v';
+bc{4+1} = 'v';
+bc{5+1} = 'v';
+bc{6+1} = 'o';
 
-% get NEK
-system(['cd ',gridname,'-init; getnek ',gridname]);
-
-% run NEK
-system(['cd ',gridname,'-init; genmap < genmap.i; ./nekmpi ',gridname,' 8']);
-
-
-
+Re = 5.333333e5;%3.75e6;
 %% Get GLL points
 
 % read flow field
 [nekdata,lr1,elmap,~,~,fields,emode,wdsz,etag,hdr] = readnek([gridname,'-init/',gridname,'0.f00001']);
 
 nel = length(elmap);
-
+load('EL.mat','EL');
 % save GLL points in EL structure
 for iel = 1:nel
     EL(iel).GLL(:,1) = squeeze(nekdata(iel,:,1));
@@ -34,6 +34,8 @@ end
 
 clear nekdata
 
+% Simulation
+simname = 'FST_naca0008-base';
 
 
 %% Interpolate data from .grid to GLL points
@@ -111,6 +113,7 @@ end
 
 
 %% Reshape data in EL structure 
+
 for ielx = 1:nelx
 	for iely = 1:nely
             
@@ -155,27 +158,12 @@ status = writenek([simname,'.bc'],nekdata,lr1,elmap,0,0,fields,emode,wdsz,etag);
 
 
 
-%% Write .rea
-param = init_param();
-param(  2) = -Re;   % RE
-param( 11) = 1.0e+6;% NSTEPS
-param( 12) = 2.0e-5;% DT
-param( 15) = 2.0e+4;% IOSTEP
-param( 33) = 0;     % .1 ratio Re ramp
-param( 34) = 0;     % 1.0 t0    Re ramp
-param( 35) = 0;     % 6.0 tend  Re ramp
-param( 63) = 1;     % real8 output files
-param( 70) = 1e3;   % proper restart update time
-param( 94) = 0;     % start projecting velocity after p94 step (0 to disable vel proj)
-
-write_rea(EL,simname,2,'BCfile',[simname,'.bc'],param);
+write_rea(EL,['base-torun/',simname],2,'BCfile',[simname,'.bc']);
 
 
 
 %% Generate simulation folder
-system(sprintf('mkdir     ../base-torun/%s',simname));
-system(sprintf('cp %s.rea ../base-torun/%s',simname,simname));
-system(sprintf('cp %s.bc  ../base-torun/%s',simname,simname));
+%system(sprintf('cp %s.bc  ../base-torun',simname));
 
 
 

@@ -1,4 +1,4 @@
-### makefile automatically created by makenek 01/17/2020 16:53:38 ###
+### makefile automatically created by makenek 01/20/2020 16:20:20 ###
 BINNAME=nek5000
 LIBNAME=libnek5000.a
 CASENAME:=FST_naca0008

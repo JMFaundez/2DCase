@@ -23,3 +23,7 @@ residualProj = yes
 residualTol = 1e-8
 density = 1
 viscosity = 1
+
+[TEMPERATURE]
+solver = none
+advection = no

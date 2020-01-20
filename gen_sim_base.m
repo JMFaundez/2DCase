@@ -7,19 +7,19 @@
 addpath('/scratch/josfa/matlab-tools/nek/')
 clc, close all, clear all
 
-
+write_file = 1;
 
 %% Parameters
 
 % Grid
 gridname = 'FST_naca0008'; runnek = 0; % -> run Nek in gridname-init by yourself because you need the right values in the SIZE file
+% -- number of points for the grid that will be mapped
+nelx = 200; % along the profile
+nely =  40; % normal to the profile
+n = 600;
+gen_gri(gridname, nelx, nely, n);
 
 
-
-% Simulation
-simname = 'FST_naca0008-base';
-
-Re = 5.333333e5;%3.75e6;
 %U  = 10; <- needed only if icdata exists
 
 % -- boundary conditions for each boundary (W: wall, v: Dirichlet, O: Neumann)
@@ -31,8 +31,7 @@ bc{4+1} = 'v';
 bc{5+1} = 'v';
 bc{6+1} = 'o';
 
-% -- fringe
-stfr = 0.0;
+
 
 
 
@@ -146,9 +145,11 @@ for i = 1:nelx
         
     end
 end
+save('EL.mat','EL')
 
-system(['rm ',gridname,'-init/',gridname,'a.rea']);
+if write_file
+system(['rm ',gridname,'-init/',gridname,'-rea.rea']);
 % system(['mkdir ',gridname,'-init']);
-write_rea(EL,[gridname,'-init/',gridname,'a'],2);
-
+write_rea(EL,[gridname,'-init/',gridname,'-rea'],2);
+end
 
