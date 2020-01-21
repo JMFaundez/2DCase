@@ -4,7 +4,11 @@ function gen_gri(gridname, nelx, nely,n)
 %   Generate mesh for wing simulations (lower cut)                        %
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% gridname:  number of the .gri file that will be saves
+% nelx:  number of elements along the x directions (airfoil)
+% nely:  numner of elements normal to the airfoil
+% n: number of points used to create the airfoil that will be
+%    interpolated
 
 % - boundary/initial condition FLUENT data
 dxbox = 2e-3; xbox = [-.2 .8]; nxbox = ceil(diff(xbox)/dxbox) + 1;
@@ -104,8 +108,8 @@ ipr = 1 + 0*xpr;
 
 %% Mid points airfoil
 spr_2 =  (spr(2:end) - spr(1:end-1))/2 + spr(1:end-1);
-x_m = fnval(xprfun,spr_2)
-y_m = fnval(yprfun,spr_2)
+x_m = fnval(xprfun,spr_2);
+y_m = fnval(yprfun,spr_2);
 midpoints.x = x_m;
 midpoints.y = y_m;
 save('mid_points.mat', 'midpoints')
@@ -127,10 +131,6 @@ yic = linspace(ybox(1),ybox(2),nybox);
 bc = load(bcdata);
 
 switch bcsource
-    case 'Morino'
-        [uuic,vvic,ppic] = morinoflowfield(bc.pan+bc.dpan,bc.cll+bc.dcll,...
-                                                bc.alpha,bc.phi,xxic,yyic);
-
     case 'FLUENT'
         uuic = griddata(bc.xx,bc.yy,bc.uu,xxic,yyic,'cubic');
         vvic = griddata(bc.xx,bc.yy,bc.vv,xxic,yyic,'cubic');
@@ -263,7 +263,7 @@ xxgr = zeros(nely+1,nelx+1);
 yygr = zeros(nely+1,nelx+1);
 iigr = zeros(nely+1,nelx+1,4); % 1=N, 2=E, 3=S, 4=W
 frgr = zeros(nely+1,nelx+1);
-%% curvature radius (spline differentiation)
+
 %% curvature radius (spline differentiation)
 d1x = fnval(fnder(xprfun,1),spro); d2x = fnval(fnder(xprfun,2),spro);
 d1x = fnval(fnder(xprfun,1),spro); d2x = fnval(fnder(xprfun,2),spro);
@@ -301,42 +301,6 @@ end
 %% Initial values and boundary conditions
 
 switch bcsource
-    case 'Morino'
-        [uugr,vvgr,ppgr] = morinoflowfield(bc.pan+bc.dpan,bc.cll+bc.dcll,bc.alpha,bc.phi,xxgr,yygr);
-
-        % fix boundary layer
-        bl = load(bldata);
-        dstfun = @(m) interp1(bl.m,bl.dst,m,'spline');
-        ublfun = @(eta,m) interp2(bl.m,bl.yy,squeeze(bl.ff(2,:,:)),m,eta,'spline',1);
-        etamax = min([max(bl.yy) 20])
-
-        % wall normal direction
-        n = [xxgr(end,:) - xxgr(1,:);
-             yygr(end,:) - yygr(1,:)]; n = n./([1 1]' * sqrt(n(1,:).^2 + n(2,:).^2));
-
-        % boundary layer characteristics
-        mbl = interp1(bc.scll,bc.m,spr,'spline');
-        deltabl = interp1(bc.scll,bc.delta,spr,'spline');
-
-        for i = 1:nelx+1
-
-            % boundary layer coordinate
-            etabl = n(:,i)' * [ xxgr(:,i)' - xxgr(1,i) ;
-                                yygr(:,i)' - yygr(1,i) ] ./ deltabl(i);
-            jj = etabl <= etamax;
-
-            % regularize velocity (close to the wall)
-            method = 'linear';
-            uugr(jj,i) = interp1(etabl(~jj),uugr(~jj,i),etabl(jj),method,'extrap');
-            vvgr(jj,i) = interp1(etabl(~jj),vvgr(~jj,i),etabl(jj),method,'extrap');
-            ppgr(jj,i) = 1 - (uugr(jj,i).^2 + vvgr(jj,i).^2)/2;
-
-            % map boundary layer to grid
-            uugr(jj,i) = ublfun(etabl(jj),mbl(i)) .* uugr(jj,i);
-            vvgr(jj,i) = ublfun(etabl(jj),mbl(i)) .* vvgr(jj,i);
-
-        end
-
     case 'FLUENT'
         uugr = griddata(bc.xx,bc.yy,bc.uu,xxgr,yygr,'cubic');
         vvgr = griddata(bc.xx,bc.yy,bc.vv,xxgr,yygr,'cubic');

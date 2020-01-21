@@ -1,4 +1,12 @@
 function fid = write_rea(EL, Ec,name,dim, varargin)
+% This function reads Elements and curved elements to create the rea file
+% This rea file does not include the parameters since it is just used 
+%  to create a .re2 file by using the tool reatore2 from Nek.
+%
+% EL : Elements with their nodes and nodes coordinates
+% Ec : Curved elements following the Nek format
+% name: name of the rea file that will be stores
+% dim: number of dimensions
 
 bcflag = 0;
 
@@ -49,21 +57,7 @@ end
 fprintf(fid,'  ***** BOUNDARY CONDITIONS *****\n');
 fprintf(fid,'  ***** FLUID BOUNDARY CONDITIONS *****\n');
 
-if nel < 1
-    for iel = 1:nel
-        for ind = 1:4
-            fprintf(fid,'%s  %3i %3i 0.00e+00 0.00e+00 0.00e+00 0.00e+00 0.00e+00\n',...
-                    EL(iel).BC(ind),iel,ind);
-        end
-    end
-elseif nel < 2
-    for iel = 1:nel
-        for ind = 1:4
-            fprintf(fid,' %s   %4i%1i   0.00000       0.00000       0.00000       0.00000       0.00000\n',...
-                    EL(iel).BC(ind),iel,ind);
-        end
-    end
-else
+if nel < 1000000
     for iel = 1:nel
         for ind = 1:4
             fprintf(fid,' %s   %5i%1i   0.00000       0.00000       0.00000       0.00000       0.00000\n',...
