@@ -11,8 +11,8 @@ write_file = 1;
 % Grid
 gridname = 'FST_naca0008'; runnek = 0; % -> run Nek in gridname-init by yourself because you need the right values in the SIZE file
 % -- number of points for the grid that will be mapped
-nelx = 200; % along the profile
-nely =  40; % normal to the profile
+nelx = 50; % along the profile
+nely =  10; % normal to the profile
 n = 600;
 gen_gri(gridname, nelx, nely, n);
 
