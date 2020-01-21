@@ -34,9 +34,9 @@ end
 
 % Curved edges
 fprintf(fid,'  ***** CURVED SIDE DATA *****\n');
-fprintf(fid,'           %5i Curved sides follow IEDGE,IEL,CURVE(I),I=1,5, CCURVE\n', nec);
+fprintf(fid,'%5i Curved sides follow IEDGE,IEL,CURVE(I),I=1,5, CCURVE\n', nec);
 for iec = 1:nec
-  fprintf(fid,'%3i %3i %14.6f %14.6f %14.6f %14.6f %14.6f %s\n',Ec(iec).edge,Ec(iec).El,Ec(iec).C(1:end), Ec(iec).type);
+  fprintf(fid,'%3i%3i%14.6E%14.6E%14.6E%14.6E%14.6E %s\n', Ec(iec).edge,Ec(iec).El,Ec(iec).C(1),Ec(iec).C(2),Ec(iec).C(3),Ec(iec).C(4),Ec(iec).C(5), Ec(iec).type);
 end
 
 % Boundary conditions
