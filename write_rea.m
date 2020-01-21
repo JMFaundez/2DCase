@@ -36,7 +36,13 @@ end
 fprintf(fid,'  ***** CURVED SIDE DATA *****\n');
 fprintf(fid,'%5i Curved sides follow IEDGE,IEL,CURVE(I),I=1,5, CCURVE\n', nec);
 for iec = 1:nec
-  fprintf(fid,'%3i%3i%14.6E%14.6E%14.6E%14.6E%14.6E %s\n', Ec(iec).edge,Ec(iec).El,Ec(iec).C(1),Ec(iec).C(2),Ec(iec).C(3),Ec(iec).C(4),Ec(iec).C(5), Ec(iec).type);
+    if nel<1000
+        fprintf(fid,'%3i%3i%14.6E%14.6E%14.6E%14.6E%14.6E %s\n', Ec(iec).edge,Ec(iec).El,Ec(iec).C(1),Ec(iec).C(2),Ec(iec).C(3),Ec(iec).C(4),Ec(iec).C(5), Ec(iec).type);
+    elseif nel< 1000000
+        fprintf(fid,'%2i%6i%14.6E%14.6E%14.6E%14.6E%14.6E %s\n', Ec(iec).edge,Ec(iec).El,Ec(iec).C(1),Ec(iec).C(2),Ec(iec).C(3),Ec(iec).C(4),Ec(iec).C(5), Ec(iec).type);
+    else
+        fprintf(fid,'%2i%12i%14.6E%14.6E%14.6E%14.6E%14.6E %s\n', Ec(iec).edge,Ec(iec).El,Ec(iec).C(1),Ec(iec).C(2),Ec(iec).C(3),Ec(iec).C(4),Ec(iec).C(5), Ec(iec).type);
+    end
 end
 
 % Boundary conditions
