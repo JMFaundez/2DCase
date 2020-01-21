@@ -1,4 +1,4 @@
-function fid = write_rea(EL,name,dim, varargin)
+function fid = write_rea(EL, Ec,name,dim, varargin)
 
 bcflag = 0;
 
@@ -18,6 +18,7 @@ if dim ~= 2
 end
 
 nel = length(EL);
+nec = length(Ec);
 
 % Open file
 fid = fopen([name,'.rea'],'w+');
@@ -33,8 +34,10 @@ end
 
 % Curved edges
 fprintf(fid,'  ***** CURVED SIDE DATA *****\n');
-fprintf(fid,'           0 Curved sides follow IEDGE,IEL,CURVE(I),I=1,5, CCURVE\n');
-
+fprintf(fid,'           %5i Curved sides follow IEDGE,IEL,CURVE(I),I=1,5, CCURVE\n', nec);
+for iec = 1:nec
+  fprintf(fid,'%3i %3i %14.6f %14.6f %14.6f %14.6f %14.6f %s\n',Ec(iec).edge,Ec(iec).El,Ec(iec).C(1:end), Ec(iec).type);
+end
 
 % Boundary conditions
 fprintf(fid,'  ***** BOUNDARY CONDITIONS *****\n');
