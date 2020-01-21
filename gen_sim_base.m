@@ -3,7 +3,7 @@
 %   Generate NEK input files (.rea, .bc)                                  %
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-addpath('/scratch/josfa/matlab-tools/nek/')
+%% addpath('/scratch/josfa/matlab-tools/nek/')
 clc, close all, clear all
 
 write_file = 1;
@@ -14,7 +14,7 @@ gridname = 'FST_naca0008'; runnek = 0; % -> run Nek in gridname-init by yourself
 nelx = 50; % along the profile
 nely =  10; % normal to the profile
 n = 600;
-gen_gri(gridname, nelx, nely, n);
+%% gen_gri(gridname, nelx, nely, n);
 
 % -- boundary conditions for each boundary (W: wall, v: Dirichlet, O: Neumann)
 bc{0+1} = 'E'; % no bc for internal nodes
@@ -30,24 +30,24 @@ bc{6+1} = 'o';
 [xx,yy,ii,uu,vv,pp,fr] = read_grid(gridname); [nely,nelx] = size(xx(2:end,2:end));
 
 %% Plot grid and ic/bc
-figure(1); clf; hold on; set (1,'Units','normalized','Position',[.5 .5 .5 .5]);
+%% figure(1); clf; hold on; set (1,'Units','normalized','Position',[.5 .5 .5 .5]);
 
-%hh = surf(xx,yy,uu,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'u')
-%hh = surf(xx,yy,vv,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'v')
-hh = surf(xx,yy,pp,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'p')
-os = max(max(get(hh,'ZData')));
+%% %hh = surf(xx,yy,uu,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'u')
+%% %hh = surf(xx,yy,vv,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'v')
+%% hh = surf(xx,yy,pp,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'p')
+%% os = max(max(get(hh,'ZData')));
 
-clrs = 'rgbcmy';
-for i = 1:max(max(max(ii)))
-    bd = sum(ii==i,3)~=0;
-    hbd(i) = plot3(xx(bd),yy(bd),os+0*xx(bd),...
-                   clrs(mod(i-1,6)+1),'LineWidth',1.5); % boundaries
-    lgd{i} = ['boundary ',(num2str(i)),' (',bc{i+1},')'];
-end
-legend(hbd,lgd,'Location','SO','Orientation','Horizontal');
+%% clrs = 'rgbcmy';
+%% for i = 1:max(max(max(ii)))
+%%     bd = sum(ii==i,3)~=0;
+%%     hbd(i) = plot3(xx(bd),yy(bd),os+0*xx(bd),...
+%%                    clrs(mod(i-1,6)+1),'LineWidth',1.5); % boundaries
+%%     lgd{i} = ['boundary ',(num2str(i)),' (',bc{i+1},')'];
+%% end
+%% legend(hbd,lgd,'Location','SO','Orientation','Horizontal');
 
-hold off; view(2); axis image; grid on
-xlabel('x/c'); ylabel('y/c'); title('Grid'); drawnow
+%% hold off; view(2); axis image; grid on
+%% xlabel('x/c'); ylabel('y/c'); title('Grid'); drawnow
 
 
 
@@ -59,8 +59,11 @@ iind = reshape(iind,nely+1,nelx+1);
 
 % generate elements
 nel = nelx*nely;
-
 iel = 0;
+iel_c = 1;
+
+load('mid_points.mat', 'midpoints')
+
 for i = 1:nelx
     for j = 1:nely
         % element id
@@ -74,13 +77,31 @@ for i = 1:nelx
                        bc{ii(j  ,i+1,4)+1} ...
                        bc{ii(j+1,i+1,3)+1} ...
                        bc{ii(j+1,i  ,2)+1} ];
+        if EL(iel).BC(1) == 'W'
+          Ec(iel_c).edge = 1;
+          Ec(iel_c).El = iel;
+          Ec(iel_c).C = [midpoints.x(iel_c) midpoints.y(iel_c) 0 0 0];
+          Ec(iel_c).type = 'm';
+          iel_c = iel_c + 1;
+        end
     end
 end
-save('EL.mat','EL')
-
+save('EL.mat','EL') 
+save('Ec.mat', 'Ec')
 if write_file
 system(['rm ',gridname,'-init/',gridname,'-rea.rea']);
 % system(['mkdir ',gridname,'-init']);
-write_rea(EL,[gridname,'-init/',gridname,'-rea'],2);
+write_rea(EL,Ec,[gridname,'-init/',gridname,'-rea'],2);
 end
 
+%% figure(2)
+%% hold on
+%% for i=1:nelx
+%%   index = (i-1)*nely + 1;
+%%   x1 = EL(index).nodes(1,1); x2 = EL(index).nodes(1,2);
+%%   y1 = EL(index).nodes(2,1); y2 = EL(index).nodes(2,2);
+%%   xm = Ec(i).C(1); ym = Ec(i).C(2);
+%%   plot([x1 x2], [y1 y2], 'ko-')
+%%   plot(xm,ym,'rx')
+%% end
+%% axis('equal')

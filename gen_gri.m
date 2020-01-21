@@ -54,10 +54,10 @@ dy = ypro(2:end) - ypro(1:end-1);
 
 ds = sqrt(dx.^2+dy.^2);
 spro = cumsum([0 ds]); [~,ispro0] = min(abs(xpro)); spro = spro - spro(ispro0);
-
 % profile spline
 xprfun = csapi(spro,xpro);
-yprfun = csapi(spro,ypro); 
+yprfun = csapi(spro,ypro);
+
 
 % curvature radius (spline differentiation)
 d1x = fnval(fnder(xprfun,1),spro); d2x = fnval(fnder(xprfun,2),spro);
@@ -102,8 +102,13 @@ rpr = fnval(rprfun,spr);
 
 ipr = 1 + 0*xpr;
 
-
-
+%% Mid points airfoil
+spr_2 =  (spr(2:end) - spr(1:end-1))/2 + spr(1:end-1);
+x_m = fnval(xprfun,spr_2)
+y_m = fnval(yprfun,spr_2)
+midpoints.x = x_m;
+midpoints.y = y_m;
+save('mid_points.mat', 'midpoints')
 %% Fringe
 Sfun = @(x) ( 1./(1 + exp(1./(x-1) + 1./x)) ).*(0 < x).*(x < 1) + (1 <= x);
 
@@ -258,6 +263,10 @@ xxgr = zeros(nely+1,nelx+1);
 yygr = zeros(nely+1,nelx+1);
 iigr = zeros(nely+1,nelx+1,4); % 1=N, 2=E, 3=S, 4=W
 frgr = zeros(nely+1,nelx+1);
+%% curvature radius (spline differentiation)
+%% curvature radius (spline differentiation)
+d1x = fnval(fnder(xprfun,1),spro); d2x = fnval(fnder(xprfun,2),spro);
+d1x = fnval(fnder(xprfun,1),spro); d2x = fnval(fnder(xprfun,2),spro);
 
 for i = 1:nelx+1
     % wall-normal direction
@@ -277,6 +286,8 @@ for i = 1:nelx+1
         iigr(2:end  ,i,2) = 6; % lower outflow boundary id
         iigr(1:end-1,i,4) = 6; % lower outflow boundary id
     elseif i == nelx+1
+%% curvature radius (spline differentiation)
+d1x = fnval(fnder(xprfun,1),spro); d2x = fnval(fnder(xprfun,2),spro);
         iigr(2:end  ,i,2) = 2; % upper outflow boundary id
         iigr(1:end-1,i,4) = 2; % upper outflow boundary id
     end
@@ -414,160 +425,160 @@ write_grid(gridname,xxgr,yygr,iigr,uugr,vvgr,ppgr,frgr);
 
 
 
-%% Plot grid
-figure(1); clf; hold on; set (1,'Units','normalized','Position',[.5 0 .5 1]);
+%% %% Plot grid
+%% figure(1); clf; hold on; set (1,'Units','normalized','Position',[.5 0 .5 1]);
 
-% ppic(abs(ppic)>3) = NaN;
-% hh = surf(xxic,yyic,uuic,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'u')
-hh = surf(xxic,yyic,ppic,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'p')
-os = max(max(get(hh,'ZData')));
+%% % ppic(abs(ppic)>3) = NaN;
+%% % hh = surf(xxic,yyic,uuic,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'u')
+%% hh = surf(xxic,yyic,ppic,'EdgeColor','none'); hc = colorbar('NO'); xlabel(hc,'p')
+%% os = max(max(get(hh,'ZData')));
 
-plot3(xpro,ypro,os+0*xpro,'--w','LineWidth',2.0); % profile
-plot3(xlwo,ylwo,os+0*xlwo,'--w','LineWidth',2.0); % lower streamline
-plot3(xupo,yupo,os+0*xupo,'--w','LineWidth',2.0); % upper streamline
+%% plot3(xpro,ypro,os+0*xpro,'--w','LineWidth',2.0); % profile
+%% plot3(xlwo,ylwo,os+0*xlwo,'--w','LineWidth',2.0); % lower streamline
+%% plot3(xupo,yupo,os+0*xupo,'--w','LineWidth',2.0); % upper streamline
 
-hgr = mesh(xxgr,yygr,os+0*xxgr,'EdgeColor',[1 1 1],'FaceColor','none'); % grid
+%% hgr = mesh(xxgr,yygr,os+0*xxgr,'EdgeColor',[1 1 1],'FaceColor','none'); % grid
 
-bd = sum(iigr==1,3)~=0; hbd(1) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-r','LineWidth',1.5);
-bd = sum(iigr==2,3)~=0; hbd(2) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-g','LineWidth',1.5);
-bd = sum(iigr==3,3)~=0; hbd(3) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-b','LineWidth',1.5);
-bd = sum(iigr==4,3)~=0; hbd(4) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-c','LineWidth',1.5);
-bd = sum(iigr==5,3)~=0; hbd(5) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-m','LineWidth',1.5);
-bd = sum(iigr==6,3)~=0; hbd(6) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-y','LineWidth',1.5);
+%% bd = sum(iigr==1,3)~=0; hbd(1) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-r','LineWidth',1.5);
+%% bd = sum(iigr==2,3)~=0; hbd(2) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-g','LineWidth',1.5);
+%% bd = sum(iigr==3,3)~=0; hbd(3) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-b','LineWidth',1.5);
+%% bd = sum(iigr==4,3)~=0; hbd(4) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-c','LineWidth',1.5);
+%% bd = sum(iigr==5,3)~=0; hbd(5) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-m','LineWidth',1.5);
+%% bd = sum(iigr==6,3)~=0; hbd(6) = plot3(xxgr(bd),yygr(bd),os+0*xxgr(bd),'-y','LineWidth',1.5);
 
-legend(hbd,'1: profile',...
-           '2: upper outflow',...
-           '3: upper streamline',...
-           '4: inflow',...
-           '5: lower stremline',...
-           '6: lower outflow','Location','SO','Orientation','Horizontal');
+%% legend(hbd,'1: profile',...
+%%            '2: upper outflow',...
+%%            '3: upper streamline',...
+%%            '4: inflow',...
+%%            '5: lower stremline',...
+%%            '6: lower outflow','Location','SO','Orientation','Horizontal');
 
-hold off; view(2); axis equal; axis([xbox ybox]);
-xlabel('x/c'); ylabel('y/c'); title('Grid'); drawnow
-
-
-
-figure(2); clf; set (2,'Units','normalized','Position',[0 0 .5 1]);
-
-subplot(4,1,1); hh = surf(xxgr,yygr,uugr,'EdgeColor','none'); hc = colorbar('EO'); xlabel(hc,'u'); hold on
-                if bcsource == 'Morino'
-                plot3(xxgr(1,:)+etamax*deltabl.*n(1,:),yygr(1,:)+etamax*deltabl.*n(2,:),xxgr(1,:)*0+max(max(uugr)),'w');
-                end;
-                hold off
-                view(2); axis image; grid on
-                xlabel('x/c'); ylabel('y/c'); title('RANS x-velocity')
-
-                ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
-                [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
-                [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
-                hm = plot3(xxgr(inmax,itmax),yygr(inmax,itmax),os,'^r',...
-                           xxgr(inmin,itmin),yygr(inmin,itmin),os,'vb','MarkerFaceColor','w');
-                legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
-                          sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
-
-subplot(4,1,2); hh = surf(xxgr,yygr,vvgr,'EdgeColor','none'); hc = colorbar('EO'); xlabel(hc,'v'); hold on
-                if bcsource == 'Morino'
-                plot3(xxgr(1,:)+etamax*deltabl.*n(1,:),yygr(1,:)+etamax*deltabl.*n(2,:),xxgr(1,:)*0+max(max(vvgr)),'w');
-                end;
-                hold off
-                view(2); axis image; grid on
-                xlabel('x/c'); ylabel('y/c'); title('RANS y-velocity')
-
-                ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
-                [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
-                [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
-                hm = plot3(xxgr(inmax,itmax),yygr(inmax,itmax),os,'^r',...
-                           xxgr(inmin,itmin),yygr(inmin,itmin),os,'vb','MarkerFaceColor','w');
-                legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
-                          sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
-
-subplot(4,1,3); hh = surf(xxgr,yygr,ppgr,'EdgeColor','none'); hc = colorbar('EO'); xlabel(hc,'p'); hold on
-                if bcsource == 'Morino'
-                plot3(xxgr(1,:)+etamax*deltabl.*n(1,:),yygr(1,:)+etamax*deltabl.*n(2,:),xxgr(1,:)*0+max(max(ppgr)),'w');
-                end;
-                hold off
-                view(2); axis image; grid on
-                xlabel('x/c'); ylabel('y/c'); title('RANS pressure')
-
-                ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
-                [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
-                [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
-                hm = plot3(xxgr(inmax,itmax),yygr(inmax,itmax),os,'^r',...
-                           xxgr(inmin,itmin),yygr(inmin,itmin),os,'vb','MarkerFaceColor','w');
-                legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
-                          sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
-
-subplot(4,1,4); hh = surf(xxgr,yygr,frgr,'EdgeColor','none'); hc = colorbar('EO'); xlabel(hc,'f'); hold on
-                if bcsource == 'Morino'
-                plot3(xxgr(1,:)+etamax*deltabl.*n(1,:),yygr(1,:)+etamax*deltabl.*n(2,:),xxgr(1,:)*0+max(max(frgr)),'w');
-                end;
-                hold off
-                view(2); axis image; grid on
-                xlabel('x/c'); ylabel('y/c'); title('Fringe-forcing mask')
-
-                ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
-                [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
-                [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
-                hm = plot3(xxgr(inmax,itmax),yygr(inmax,itmax),os,'^r',...
-                           xxgr(inmin,itmin),yygr(inmin,itmin),os,'vb','MarkerFaceColor','w');
-                legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
-                          sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
+%% hold off; view(2); axis equal; axis([xbox ybox]);
+%% xlabel('x/c'); ylabel('y/c'); title('Grid'); drawnow
 
 
 
-figure(3); clf; set (3,'Units','normalized','Position',[.5 0 .5 1]);
+%% figure(2); clf; set (2,'Units','normalized','Position',[0 0 .5 1]);
 
-subplot(4,1,1); hh = surf(xxel,yyel,arel,'EdgeColor','none');
-                hc = colorbar('EO'); xlabel(hc,'|l_i|_{max} / |l_i|_{min}')
-                view(2); axis image; grid on
-                xlabel('x/c'); ylabel('y/c'); title ('Aspect Ratio')
+%% subplot(4,1,1); hh = surf(xxgr,yygr,uugr,'EdgeColor','none'); hc = colorbar('EO'); xlabel(hc,'u'); hold on
+%%                 if bcsource == 'Morino'
+%%                 plot3(xxgr(1,:)+etamax*deltabl.*n(1,:),yygr(1,:)+etamax*deltabl.*n(2,:),xxgr(1,:)*0+max(max(uugr)),'w');
+%%                 end;
+%%                 hold off
+%%                 view(2); axis image; grid on
+%%                 xlabel('x/c'); ylabel('y/c'); title('RANS x-velocity')
 
-                ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
-                [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
-                [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
-                hm = plot3(xxel(inmax,itmax),yyel(inmax,itmax),os,'^r',...
-                           xxel(inmin,itmin),yyel(inmin,itmin),os,'vb','MarkerFaceColor','w');
-                legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
-                          sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
+%%                 ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
+%%                 [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
+%%                 [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
+%%                 hm = plot3(xxgr(inmax,itmax),yygr(inmax,itmax),os,'^r',...
+%%                            xxgr(inmin,itmin),yygr(inmin,itmin),os,'vb','MarkerFaceColor','w');
+%%                 legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
+%%                           sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
 
-subplot(4,1,2); hh = surf(xxel,yyel,skel,'EdgeColor','none');
-                hc = colorbar('EO'); xlabel(hc,'|\theta_i - \pi/2|_{max} / \pi/2')
-                view(2); axis image; grid on
-                xlabel('x/c'); ylabel('y/c'); title ('Skewness')
+%% subplot(4,1,2); hh = surf(xxgr,yygr,vvgr,'EdgeColor','none'); hc = colorbar('EO'); xlabel(hc,'v'); hold on
+%%                 if bcsource == 'Morino'
+%%                 plot3(xxgr(1,:)+etamax*deltabl.*n(1,:),yygr(1,:)+etamax*deltabl.*n(2,:),xxgr(1,:)*0+max(max(vvgr)),'w');
+%%                 end;
+%%                 hold off
+%%                 view(2); axis image; grid on
+%%                 xlabel('x/c'); ylabel('y/c'); title('RANS y-velocity')
 
-                ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
-                [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
-                [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
-                hm = plot3(xxel(inmax,itmax),yyel(inmax,itmax),os,'^r',...
-                           xxel(inmin,itmin),yyel(inmin,itmin),os,'vb','MarkerFaceColor','w');
-                legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
-                          sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
+%%                 ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
+%%                 [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
+%%                 [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
+%%                 hm = plot3(xxgr(inmax,itmax),yygr(inmax,itmax),os,'^r',...
+%%                            xxgr(inmin,itmin),yygr(inmin,itmin),os,'vb','MarkerFaceColor','w');
+%%                 legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
+%%                           sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
 
-subplot(4,1,3); hh = surf(xxel,yyel,dtel,'EdgeColor','none');
-                hc = colorbar('EO'); xlabel(hc,'\Deltat')
-                view(2); axis image; grid on
-                xlabel('x/c'); ylabel('y/c'); title ('Resolution (wall-wise)')
+%% subplot(4,1,3); hh = surf(xxgr,yygr,ppgr,'EdgeColor','none'); hc = colorbar('EO'); xlabel(hc,'p'); hold on
+%%                 if bcsource == 'Morino'
+%%                 plot3(xxgr(1,:)+etamax*deltabl.*n(1,:),yygr(1,:)+etamax*deltabl.*n(2,:),xxgr(1,:)*0+max(max(ppgr)),'w');
+%%                 end;
+%%                 hold off
+%%                 view(2); axis image; grid on
+%%                 xlabel('x/c'); ylabel('y/c'); title('RANS pressure')
 
-                ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
-                [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
-                [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
-                hm = plot3(xxel(inmax,itmax),yyel(inmax,itmax),os,'^r',...
-                           xxel(inmin,itmin),yyel(inmin,itmin),os,'vb','MarkerFaceColor','w');
-                legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
-                          sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
+%%                 ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
+%%                 [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
+%%                 [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
+%%                 hm = plot3(xxgr(inmax,itmax),yygr(inmax,itmax),os,'^r',...
+%%                            xxgr(inmin,itmin),yygr(inmin,itmin),os,'vb','MarkerFaceColor','w');
+%%                 legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
+%%                           sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
 
-subplot(4,1,4); hh = surf(xxel,yyel,dnel,'EdgeColor','none');
-                hc = colorbar('EO'); xlabel(hc,'\Deltan')
-                view(2); axis image; grid on
-                xlabel('x/c'); ylabel('y/c'); title ('Resolution (wall-normal)')
+%% subplot(4,1,4); hh = surf(xxgr,yygr,frgr,'EdgeColor','none'); hc = colorbar('EO'); xlabel(hc,'f'); hold on
+%%                 if bcsource == 'Morino'
+%%                 plot3(xxgr(1,:)+etamax*deltabl.*n(1,:),yygr(1,:)+etamax*deltabl.*n(2,:),xxgr(1,:)*0+max(max(frgr)),'w');
+%%                 end;
+%%                 hold off
+%%                 view(2); axis image; grid on
+%%                 xlabel('x/c'); ylabel('y/c'); title('Fringe-forcing mask')
 
-                ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
-                [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
-                [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
-                hm = plot3(xxel(inmax,itmax),yyel(inmax,itmax),os,'^r',...
-                           xxel(inmin,itmin),yyel(inmin,itmin),os,'vb','MarkerFaceColor','w');
-                legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
-                          sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
+%%                 ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
+%%                 [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
+%%                 [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
+%%                 hm = plot3(xxgr(inmax,itmax),yygr(inmax,itmax),os,'^r',...
+%%                            xxgr(inmin,itmin),yygr(inmin,itmin),os,'vb','MarkerFaceColor','w');
+%%                 legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
+%%                           sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
+
+
+
+%% figure(3); clf; set (3,'Units','normalized','Position',[.5 0 .5 1]);
+
+%% subplot(4,1,1); hh = surf(xxel,yyel,arel,'EdgeColor','none');
+%%                 hc = colorbar('EO'); xlabel(hc,'|l_i|_{max} / |l_i|_{min}')
+%%                 view(2); axis image; grid on
+%%                 xlabel('x/c'); ylabel('y/c'); title ('Aspect Ratio')
+
+%%                 ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
+%%                 [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
+%%                 [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
+%%                 hm = plot3(xxel(inmax,itmax),yyel(inmax,itmax),os,'^r',...
+%%                            xxel(inmin,itmin),yyel(inmin,itmin),os,'vb','MarkerFaceColor','w');
+%%                 legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
+%%                           sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
+
+%% subplot(4,1,2); hh = surf(xxel,yyel,skel,'EdgeColor','none');
+%%                 hc = colorbar('EO'); xlabel(hc,'|\theta_i - \pi/2|_{max} / \pi/2')
+%%                 view(2); axis image; grid on
+%%                 xlabel('x/c'); ylabel('y/c'); title ('Skewness')
+
+%%                 ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
+%%                 [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
+%%                 [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
+%%                 hm = plot3(xxel(inmax,itmax),yyel(inmax,itmax),os,'^r',...
+%%                            xxel(inmin,itmin),yyel(inmin,itmin),os,'vb','MarkerFaceColor','w');
+%%                 legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
+%%                           sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
+
+%% subplot(4,1,3); hh = surf(xxel,yyel,dtel,'EdgeColor','none');
+%%                 hc = colorbar('EO'); xlabel(hc,'\Deltat')
+%%                 view(2); axis image; grid on
+%%                 xlabel('x/c'); ylabel('y/c'); title ('Resolution (wall-wise)')
+
+%%                 ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
+%%                 [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
+%%                 [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
+%%                 hm = plot3(xxel(inmax,itmax),yyel(inmax,itmax),os,'^r',...
+%%                            xxel(inmin,itmin),yyel(inmin,itmin),os,'vb','MarkerFaceColor','w');
+%%                 legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
+%%                           sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
+
+%% subplot(4,1,4); hh = surf(xxel,yyel,dnel,'EdgeColor','none');
+%%                 hc = colorbar('EO'); xlabel(hc,'\Deltan')
+%%                 view(2); axis image; grid on
+%%                 xlabel('x/c'); ylabel('y/c'); title ('Resolution (wall-normal)')
+
+%%                 ax = axis; hold on; data = get(hh,'ZData'); os = max(max(data));
+%%                 [dum,inmax] = max(data); [dum,itmax] = max(dum); inmax = inmax(itmax);
+%%                 [dum,inmin] = min(data); [dum,itmin] = min(dum); inmin = inmin(itmin);
+%%                 hm = plot3(xxel(inmax,itmax),yyel(inmax,itmax),os,'^r',...
+%%                            xxel(inmin,itmin),yyel(inmin,itmin),os,'vb','MarkerFaceColor','w');
+%%                 legend(hm,sprintf('max: %.2e',data(inmax,itmax)),...
+%%                           sprintf('min:  %.2e',data(inmin,itmin)),'Location','NE'); hold off
 
 
 % figure(4); clf; set (4,'Units','normalized','Position',[0. 0. 1. 1.]);
