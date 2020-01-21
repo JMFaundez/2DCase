@@ -43,14 +43,14 @@ end
 fprintf(fid,'  ***** BOUNDARY CONDITIONS *****\n');
 fprintf(fid,'  ***** FLUID BOUNDARY CONDITIONS *****\n');
 
-if nel < 1e3
+if nel < 1
     for iel = 1:nel
         for ind = 1:4
-            fprintf(fid,' %s  %3i %3i 0.00e+00 0.00e+00 0.00e+00 0.00e+00 0.00e+00\n',...
+            fprintf(fid,'%s  %3i %3i 0.00e+00 0.00e+00 0.00e+00 0.00e+00 0.00e+00\n',...
                     EL(iel).BC(ind),iel,ind);
         end
     end
-elseif nel < 1e4
+elseif nel < 2
     for iel = 1:nel
         for ind = 1:4
             fprintf(fid,' %s   %4i%1i   0.00000       0.00000       0.00000       0.00000       0.00000\n',...
