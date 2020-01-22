@@ -102,9 +102,9 @@ save('Ec.mat', 'Ec')
 if write_file
     system(['rm ','GLL/',gridname,'-rea.rea']);
     write_rea(EL,Ec,['GLL/',gridname,'-rea'],2);
-    system(['rm ',gridname,'base/',gridname,'-rea.rea']);
+    system(['rm ','base/',gridname,'-rea.rea']);
     write_rea(EL,Ec,['base/',gridname,'-rea'],2);
-    system(['rm ',gridname,'fringe/',gridname,'-rea.rea']);
+    system(['rm ','fringe/',gridname,'-rea.rea']);
     write_rea(EL,Ec,['fringe/',gridname,'-rea'],2);
 end
 clc, clear all
