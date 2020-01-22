@@ -1,10 +1,10 @@
-### makefile automatically created by makenek 01/21/2020 21:05:22 ###
+### makefile automatically created by makenek 01/22/2020 11:07:25 ###
 BINNAME=nek5000
 LIBNAME=libnek5000.a
 CASENAME:=box
-CASEDIR:=/home/Jose/KTH/PhD/2DCase/gen_mesh
-S=/home/Jose/Nek5000/core
-SCMT=/home/Jose/Nek5000/core/cmt
+CASEDIR:=/scratch/josfa/2DCase/gen_mesh
+S=/scratch/josfa/Nek5000/core
+SCMT=/scratch/josfa/Nek5000/core/cmt
 OPT_INCDIR=./
 OBJDIR=obj
 
@@ -18,7 +18,7 @@ PPPO=
 PPS= MPI UNDERSCORE GLOBAL_LONG_LONG TIMER
 
 USR=
-USR_LFLAGS= -L/home/Jose/Nek5000/3rd_party/blasLapack -lblasLapack -L/home/Jose/Nek5000/3rd_party/gslib/lib -lgs
+USR_LFLAGS= -L/scratch/josfa/Nek5000/3rd_party/blasLapack -lblasLapack -L/scratch/josfa/Nek5000/3rd_party/gslib/lib -lgs
 
 MPI=1
 CMT=0
@@ -28,7 +28,7 @@ VISIT=0
 VISIT_IFLAGS=
 VISIT_LFLAGS=
 HYPRE_IFLAGS=
-GSLIB_IFLAGS:= -I/home/Jose/Nek5000/3rd_party/gslib/include
+GSLIB_IFLAGS:= -I/scratch/josfa/Nek5000/3rd_party/gslib/include
 PARRSB_IFLAGS=
 
 ################################################################################
