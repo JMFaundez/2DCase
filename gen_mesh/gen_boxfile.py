@@ -1,17 +1,19 @@
 import numpy as np
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import subprocess
 
 #Number of elements x and y direction
-Nx = 100
-Ny = 20
+Nx = 200
+Ny = 40
 # Upper and lower point where the airfoil is cut
 xup = 0.5
 xlow = 0.3
 # Height to free stream
-yh = 0.3
+yh = 0.2
 #ratio for Boundary layer
-ratio = 1.8
+ratio = 1.4
 
 pi = np.pi
 x = np.zeros(Nx+1)
