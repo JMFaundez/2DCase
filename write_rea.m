@@ -9,15 +9,15 @@ function fid = write_rea(EL, Ec,name,dim, varargin)
 % dim: number of dimensions
 
 bcflag = 0;
-
-% -read varargin
-for i = 2:2:length(varargin)
-    switch varargin{i-1}
-        case 'BCfile'
-            bcflag = 1;
-            bcname = varargin{i};
-    end
-end
+% 
+% % -read varargin
+% for i = 2:2:length(varargin)
+%     switch varargin{i-1}
+%         case 'BCfile'
+%             bcflag = 1;
+%             bcname = varargin{i};
+%     end
+% end
 
 % Dimension check
 if dim ~= 2
@@ -27,6 +27,9 @@ end
 
 nel = length(EL);
 nec = length(Ec);
+if nec==1
+    nec=0;
+end
 
 % Open file
 fid = fopen([name,'.rea'],'w+');

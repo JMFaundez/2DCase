@@ -1,3 +1,4 @@
+function gen_rea_base()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                         %
 %   Generate NEK input files (.rea)                                  %
@@ -8,12 +9,15 @@ clc, close all, clear all
 
 write_file = 1;
 plot_stuff = 0;
+curved_el = 0;
 % Grid
-gridname = 'FST_naca0008'; runnek = 0; % -> run Nek in gridname-init by yourself because you need the right values in the SIZE file
+gridname = 'FST_naca0008';
 % -- number of points for the grid that will be mapped
 nelx = 200; % along the profile
 nely =  40; % normal to the profile
 n = 600;
+
+% uncomment the following line if nelx or nely changes
 gen_gri(gridname, nelx, nely, n);
 
 % -- boundary conditions for each boundary (W: wall, v: Dirichlet, O: Neumann)
@@ -65,7 +69,8 @@ iel_c = 1;
 
 % Load the midpoints of the curved elements
 load('mid_points.mat', 'midpoints')
-
+EL = struct('nodenum',[],'nodes',[]);
+Ec = struct('edge',[],'El',[], 'C',[], 'type',[]);
 for i = 1:nelx
     for j = 1:nely
         % element id
@@ -81,7 +86,7 @@ for i = 1:nelx
                        bc{ii(j+1,i  ,2)+1} ];
         % The only BC wall is at the airfoil profile and the first edge
         % represents the curved face
-        if EL(iel).BC(1) == 'W'
+        if EL(iel).BC(1) == 'W' && curved_el
           Ec(iel_c).edge = 1;
           Ec(iel_c).El = iel;
           Ec(iel_c).C = [midpoints.x(iel_c) midpoints.y(iel_c) 0 0 0];
@@ -95,9 +100,11 @@ save('EL.mat','EL')
 save('Ec.mat', 'Ec')
 
 if write_file
-    system(['rm ',gridname,'-init/',gridname,'-rea.rea']);
-    write_rea(EL,Ec,[gridname,'-init/',gridname,'-rea'],2);
-    system(['rm ',gridname,'base-torun/',gridname,'-rea.rea']);
-    write_rea(EL,Ec,['base-torun/',gridname,'-rea'],2);
+    system(['rm ','GLL/',gridname,'-rea.rea']);
+    write_rea(EL,Ec,['GLL/',gridname,'-rea'],2);
+    system(['rm ',gridname,'base/',gridname,'-rea.rea']);
+    write_rea(EL,Ec,['base/',gridname,'-rea'],2);
+    system(['rm ',gridname,'fringe/',gridname,'-rea.rea']);
+    write_rea(EL,Ec,['fringe/',gridname,'-rea'],2);
 end
 clc, clear all
