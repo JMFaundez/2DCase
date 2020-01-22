@@ -1,10 +1,10 @@
-
 clc, close all, clear all
+addpath('/scratch/josfa/matlab-tools/nek/')
 gridname = 'FST_naca0008';
 %% Load grid
 [xx,yy,ii,uu,vv,pp,fr] = read_grid(gridname); [nely,nelx] = size(xx(2:end,2:end));
 % -- fringe
-stfr = 0.0;
+stfr = 2/1.2e-2;
 
 % -- boundary conditions for each boundary (W: wall, v: Dirichlet, O: Neumann)
 bc{0+1} = 'E'; % no bc for internal nodes
@@ -19,7 +19,7 @@ Re = 5.333333e5;%3.75e6;
 %% Get GLL points
 
 % read flow field
-[nekdata,lr1,elmap,~,~,fields,emode,wdsz,etag,hdr] = readnek([gridname,'-init/',gridname,'0.f00001']);
+[nekdata,lr1,elmap,~,~,fields,emode,wdsz,etag,hdr] = readnek(['GLL/',gridname,'0.f00001']);
 nel = length(elmap);
 load('EL.mat','EL');
 % save GLL points in EL structure
@@ -153,7 +153,10 @@ for iel = 1:nel
 end
 
 % write initial condition file
-status = writenek(['base-torun/',simname,'.bc'],nekdata,lr1,elmap,0,0,fields,emode,wdsz,etag);
-
-status = writenek(['base-torun/',simname,'.bc0.f00001'],nekdata,lr1,elmap,0,0,fields,emode,4,etag);
+if stfr>0
+    status =writenek(['fringe/',simname,'.bc'],nekdata,lr1,elmap,0,0,fields,emode,wdsz,etag);
+else
+    status =writenek(['base/',simname,'.bc'],nekdata,lr1,elmap,0,0,fields,emode,wdsz,etag);   
+end
+%status = writenek(['base-torun/',simname,'.bc0.f00001'],nekdata,lr1,elmap,0,0,fields,emode,4,etag);
 
