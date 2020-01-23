@@ -1,0 +1,5 @@
+export PATH=/scratch/josfa/Nek5000/bin/:$PATH
+cd /scratch/josfa/Nek5000/tools/
+./maketools genmap
+./maketools reatore2
+cd -

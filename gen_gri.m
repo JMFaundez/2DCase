@@ -1,4 +1,4 @@
-function gen_gri(gridname, nelx, nely,n)
+function gen_gri(gridname, nelx, nely,n, meshn)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                         %
 %   Generate mesh for wing simulations (lower cut)                        %
@@ -112,7 +112,7 @@ x_m = fnval(xprfun,spr_2);
 y_m = fnval(yprfun,spr_2);
 midpoints.x = x_m;
 midpoints.y = y_m;
-save('mid_points.mat', 'midpoints')
+save(['mid_points_',num2str(meshn),'.mat'], 'midpoints')
 %% Fringe
 Sfun = @(x) ( 1./(1 + exp(1./(x-1) + 1./x)) ).*(0 < x).*(x < 1) + (1 <= x);
 

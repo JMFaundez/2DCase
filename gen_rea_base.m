@@ -10,15 +10,19 @@ clc, close all, clear all
 write_file = 1;
 plot_stuff = 0;
 curved_el = 0;
-% Grid
-gridname = 'FST_naca0008';
+
 % -- number of points for the grid that will be mapped
-nelx = 200; % along the profile
-nely =  40; % normal to the profile
+nelx = 100; % along the profile
+nely =  20; % normal to the profile
 n = 600;
+mesh_number = 1;
+
+% Grid
+gridname = ['mesh_',num2str(mesh_number)];
 
 % uncomment the following line if nelx or nely changes
-gen_gri(gridname, nelx, nely, n);
+gen_gri(gridname, nelx, nely, n, mesh_number);
+
 
 % -- boundary conditions for each boundary (W: wall, v: Dirichlet, O: Neumann)
 bc{0+1} = 'E'; % no bc for internal nodes
@@ -68,7 +72,7 @@ iel = 0;
 iel_c = 1;
 
 % Load the midpoints of the curved elements
-load('mid_points.mat', 'midpoints')
+load(['mid_points_',num2str(mesh_number),'.mat'], 'midpoints')
 EL = struct('nodenum',[],'nodes',[]);
 Ec = struct('edge',[],'El',[], 'C',[], 'type',[]);
 for i = 1:nelx
@@ -96,8 +100,8 @@ for i = 1:nelx
     end
 end
 %Store the elements 
-save('EL.mat','EL') 
-save('Ec.mat', 'Ec')
+save(['EL_',num2str(mesh_number),'.mat'],'EL') 
+save(['Ec_',num2str(mesh_number),'.mat'], 'Ec')
 
 if write_file
     system(['rm ','GLL/',gridname,'-rea.rea']);

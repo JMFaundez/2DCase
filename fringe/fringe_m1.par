@@ -1,0 +1,31 @@
+#
+# nek parameter file
+#
+[GENERAL]
+startFrom = 'mesh_1_BC.bc'
+stopAt = numSteps
+numSteps = 3
+
+variableDT = yes
+targetCFL = 0.5
+timeStepper = bdf2
+
+writeControl = timeStep
+writeInterval = 1
+
+[PROBLEMTYPE]
+equation = incompNS
+
+[PRESSURE]
+residualTol = 1e-5
+residualProj = yes
+
+[VELOCITY]
+residualTol = 1e-8
+density = 1
+viscosity = -5.333333e5
+
+[TEMPERATURE]
+rhoCp = 0
+conductivity = 0
+advection = no
