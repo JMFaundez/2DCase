@@ -1,0 +1,286 @@
+c-----------------------------------------------------------------------
+c  nek5000 user-file template
+c
+c  user specified routines:
+c     - uservp  : variable properties
+c     - userf   : local acceleration term for fluid
+c     - userq   : local source term for scalars
+c     - userbc  : boundary conditions
+c     - useric  : initial conditions
+c     - userchk : general purpose routine for checking errors etc.
+c     - userqtl : thermal divergence for lowMach number flows 
+c     - usrdat  : modify element vertices 
+c     - usrdat2 : modify mesh coordinates
+c     - usrdat3 : general purpose routine for initialization
+c     
+c-----------------------------------------------------------------------
+
+c-----------------------------------------------------------------------
+
+      subroutine uservp (ix,iy,iz,ieg)
+      return
+      end
+
+c-----------------------------------------------------------------------
+
+      subroutine userf  (ix,iy,iz,ieg)
+
+      implicit none
+
+      include 'SIZE'  ! L[XYZ]1,LELV,LPX1,LPY1,LPZ1,NID
+      include 'SOLN'  ! V[XYZ]
+      include 'NEKUSE'! FF[XYZ]
+      include 'PARALLEL' ! GLLEL
+
+      integer, intent(in) :: ix,iy,iz,ieg
+
+      real*8  ux_bc(lx1,ly1,lz1,lelv),uy_bc(lx1,ly1,lz1,lelv),
+     $     uz_bc(lx1,ly1,lz1,lelv),s_fr(lx1,ly1,lz1,lelv)
+      COMMON / usrboundc / ux_bc,uy_bc,uz_bc,s_fr
+
+      real*8 frx,fry,frz,ctrlx,ctrly,ctrlz,s
+      integer iel,ixyze
+
+      iel = gllel(ieg)
+
+      ! Fringe forcing (see usrchk for initialisation)
+      frx = 0.0d0; fry = 0.0d0; frz = 0.0d0;
+      write(*,*) ' USERF 1'
+	if (JP.eq.0) then ! baseflow: fringe to bc file
+      write(*,*) 'USERF 2'
+         if (s_fr(ix,iy,iz,iel).ge.1.0d-16) then
+            write(*,*) 'USERF 3'
+            s = s_fr(ix,iy,iz,iel)
+            frx = s * (ux_bc(ix,iy,iz,iel) - vx(ix,iy,iz,iel))
+            fry = s * (uy_bc(ix,iy,iz,iel) - vy(ix,iy,iz,iel))
+            frz = s * (uz_bc(ix,iy,iz,iel) - vz(ix,iy,iz,iel))
+         end if
+
+      else ! perturbation: fringe to zero
+         write(*,*) 'USERF 4'
+         if (s_fr(ix,iy,iz,iel).ge.1.0d-16) then
+            s = s_fr(ix,iy,iz,iel)
+            ixyze = ix + (iy-1)*lpx1 + (iz-1)*lpx1*lpy1
+     &                                          + (iel-1)*lpx1*lpy1*lpz1
+            frx = s * (0.0d0 - vxp(ixyze,jp))
+            fry = s * (0.0d0 - vyp(ixyze,jp))
+            frz = s * (0.0d0 - vzp(ixyze,jp))
+         end if
+      
+      end if
+
+      ! Control forcing
+      !ctrlx = 0.0d0; ctrly = 0.0d0; ctrlz = 0.0d0;
+      !call ctrl_forcing(ctrlx,ctrly,ctrlz,ix,iy,iz,iel)
+
+      ! Total forcing
+      ffx = frx !+ ctrlx
+      ffy = fry !+ ctrly
+      ffz = frz !+ ctrlz
+
+      end
+
+c-----------------------------------------------------------------------
+
+      subroutine userq  (ix,iy,iz,ieg)
+      return
+      end
+
+c-----------------------------------------------------------------------
+
+      subroutine userchk
+
+      implicit none
+
+      include 'SIZE'  ! L[XYZ]1,LELV,NID
+      include 'TSTEP' ! ISTEP,IOSTEP
+      include 'SOLN'            ! V[XYZ],V[XYZ]P
+      include 'INPUT'
+      real*8  ux_bc(lx1,ly1,lz1,lelv),uy_bc(lx1,ly1,lz1,lelv),
+     $     uz_bc(lx1,ly1,lz1,lelv),s_fr(lx1,ly1,lz1,lelv)
+      COMMON / usrboundc / ux_bc,uy_bc,uz_bc,s_fr
+      
+      real*8 ux_old(lx1,ly1,lz1,lelv),
+     $       uy_old(lx1,ly1,lz1,lelv),
+     $       uz_old(lx1,ly1,lz1,lelv)
+      COMMON / usroldvel/ ux_old,uy_old,uz_old 
+
+      real*8 h1,semi,l2,linf
+
+      integer j
+      
+      
+      if (istep .eq. 0) then
+
+         ! Initialize boundary conditions
+         if (nid.eq.0) write(*,*) 'init bc'
+         call opcopy(ux_bc,uy_bc,uz_bc,vx,vy,vz)
+         
+         ! Initialize fringe strength (loaded as temperature field)
+         if (nid.eq.0) write(*,*) 'init fringe'
+         if (all(t.eq.0)) write(*,*) ' t empty'
+	 s_fr = 0.0d0
+	 call copy(s_fr,t,nx1*ny1*nz1*nelv)
+         
+  
+         if (all((s_fr).eq.0)) write(*,*) 'fringe  empty'
+         ! Initialize control
+         !if (nid.eq.0) write(*,*) 'init control'
+         !call ctrl_init            
+
+      end if
+
+
+      ! NaN check: NaN.eq.NaN = .false.
+      if (vx(1,1,1,1).ne.vx(1,1,1,1)) then
+         if (nid.eq.0) write(*,*) 'NaN detected!'
+         call exitt
+      end if
+      do j = 1,npert
+         if (vxp(1,j).ne.vxp(1,j)) then
+            if (nid.eq.0) write(*,*) 'NaN detected!'
+            call exitt
+         end if
+      end do
+
+      
+      ! L2 norm of the residue
+      if (istep.eq.0) then
+        call rzero(ux_old,nx1*ny1*nz1*nelv)
+        call rzero(uy_old,nx1*ny1*nz1*nelv)
+        call rzero(uz_old,nx1*ny1*nz1*nelv)
+      else !if (mod(istep,iostep).eq.0) then
+        call opsub2(ux_old,uy_old,uz_old,vx,vy,vz)
+        call normvc(h1,semi,l2,linf,ux_old,uy_old,uz_old)
+        
+        call opcopy(ux_old,uy_old,uz_old,vx,vy,vz)
+
+        if (NID.eq.0) then
+          write(*,*) 'Residue: L2 = ',l2,', Linf = ',linf
+        end if
+      end if
+      
+      ! Statistics
+      !call stat_avg_all 
+
+      ! Restart
+      !call checkpoint
+
+      ! Reynolds ramp (for baseflow calculations)
+      !call reyramp_step
+
+      ! Control
+      !call ctrl_get_dist
+      !call ctrl_get_output
+      !call ctrl_get_input
+      !call ctrl_dump
+
+
+      ! Save initial condition
+      if (istep.eq.0) then
+         ifto = .true.
+         call outpost(vx,vy,vz,pr,s_fr,'   ')
+         ifto = .false.
+      endif
+
+      ! Save perturbartion
+      if ((npert.ne.0).and.(mod(istep,iostep).eq.0)) then
+         call outpost(vxp,vyp,vzp,prp,tp,'prt')
+      endif
+
+      end
+
+c-----------------------------------------------------------------------
+
+      subroutine userbc (ix,iy,iz,iside,ieg)
+c     NOTE ::: This subroutine MAY NOT be called by every process
+
+      implicit none
+
+      include 'SIZE'  ! L[XYZ]1,LELV
+      include 'PARALLEL'  ! GLLEL
+      include 'SOLN'! JP
+      include 'NEKUSE'! U[XYZ],PA,TEMP,JP
+      integer, intent(in) :: ix,iy,iz,iside,ieg
+
+      real*8  ux_bc(lx1,ly1,lz1,lelv),uy_bc(lx1,ly1,lz1,lelv),
+     $     uz_bc(lx1,ly1,lz1,lelv),s_fr(lx1,ly1,lz1,lelv)
+      COMMON / usrboundc / ux_bc,uy_bc,uz_bc,s_fr
+
+      integer iel
+      
+      iel = gllel(ieg)
+      write(*,*) 'USERBC 1'
+      if (JP.eq.0) then ! baseflow: bc from file
+         write(*,*) 'USERBC 2'       
+         ux = ux_bc(ix,iy,iz,iel)
+         uy = uy_bc(ix,iy,iz,iel)
+         uz = uz_bc(ix,iy,iz,iel)
+         
+         if (s_fr(ix,iy,iz,iel).le.-1.0d-16) then ! pressure loaded as negative fringe
+            pa = -s_fr(ix,iy,iz,iel)
+            write(*,*) '=========== BC- JOSEEEE ==========', pa
+	else
+            pa = 0.0d0
+         end if
+
+      else ! perturbation: homogeneous Dirichlet and homogeneous outflow
+         write(*,*) 'USERBC 3'
+         ux = 0.0d0
+         uy = 0.0d0
+         uz = 0.0d0
+         
+         pa = 0.0d0         
+
+      end if
+         
+      temp = 0.0d0
+
+      end
+
+c-----------------------------------------------------------------------
+
+      subroutine useric (ix,iy,iz,ieg)
+
+      implicit none
+
+      include 'SIZE'  ! L[XYZ]1,LELV
+      include 'SOLN'  ! JP
+      include 'NEKUSE'! U[XYZ]
+      integer, intent(in) :: ix,iy,iz,ieg
+
+      ! perturbation field
+      if (JP.ne.0) then
+         ux = 0.0d0; uy = 0.0d0; uz = 0.0d0
+      end if
+
+      return
+      end
+
+c-----------------------------------------------------------------------
+
+      subroutine usrdat
+
+      implicit none
+
+      include 'SIZE'
+
+!     to read user module parameters
+      !call uprm_read
+
+      return
+      end
+
+c-----------------------------------------------------------------------
+
+      subroutine usrdat2
+      return
+      end
+
+c-----------------------------------------------------------------------
+
+      subroutine usrdat3
+      return
+      end
+
+c------------------------------------------------------------------------
