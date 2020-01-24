@@ -4,14 +4,14 @@
 [GENERAL]
 startFrom = 'mesh_1_BC.bc'
 stopAt = numSteps
-numSteps = 3
+numSteps = 10
 
 variableDT = yes
 targetCFL = 0.5
 timeStepper = bdf2
 
-writeControl = timeStep
 writeInterval = 1
+writeControl = timeStep
 
 [PROBLEMTYPE]
 equation = incompNS
@@ -26,6 +26,5 @@ density = 1
 viscosity = -5.333333e5
 
 [TEMPERATURE]
-rhoCp = 0
-conductivity = 0
-advection = no
+rhoCp = 1.0
+conductivity = 3.1623E-0.4

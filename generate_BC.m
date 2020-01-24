@@ -1,13 +1,13 @@
 clc, close all, clear all
 addpath('/scratch/josfa/matlab-tools/nek/')
 
-mesh_n = 1;
+mesh_n = 2;
 gridname = ['mesh_',num2str(mesh_n)];
 
 %% Load grid
 [xx,yy,ii,uu,vv,pp,fr] = read_grid(gridname); [nely,nelx] = size(xx(2:end,2:end));
 % -- fringe
-stfr = 0 ; %2/(1.2e-2);
+stfr = 2/(1.2e-2);
 simname = ['mesh_',num2str(mesh_n),'_BC'];
 % -- boundary conditions for each boundary (W: wall, v: Dirichlet, O: Neumann)
 bc{0+1} = 'E'; % no bc for internal nodes
@@ -92,8 +92,8 @@ if strcmp(bc{2+1},'o')
     dudx = uuic(:,ibel) * Dlgl(end,:)' ./ lbel;
     pa = ppic(:,ibc) - 1/Re * dudx;
     
-    % pa as negative fringe
-    ffic(:,ibc) = -pa;
+    % pa is negative fringe
+    ffic(:,ibc) = pa;
 end
 
 if strcmp(bc{6+1},'o')
@@ -106,7 +106,7 @@ if strcmp(bc{6+1},'o')
     dudx = uuic(:,ibel) * Dlgl(end,:)' ./ lbel;
     pa = ppic(:,ibc) - 1/Re * dudx;
     
-    % pa as negative fringe
+    % pa is negative fringe
     ffic(:,ibc) = -pa;
 end
 

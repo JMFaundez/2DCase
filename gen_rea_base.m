@@ -9,13 +9,13 @@ clc, close all, clear all
 
 write_file = 1;
 plot_stuff = 0;
-curved_el = 1;
+curved_el = 0;
 
 % -- number of points for the grid that will be mapped
-nelx = 100; % along the profile
-nely =  20; % normal to the profile
-n = 600;
-mesh_number = 3;
+nelx = 200; % along the profile
+nely =  40; % normal to the profile
+n = 700;
+mesh_number = 2;
 
 % Grid
 gridname = ['mesh_',num2str(mesh_number)];
