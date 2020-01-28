@@ -5,7 +5,13 @@ import matplotlib.pyplot as plt
 from scipy import optimize, integrate
 
 def shape_1(xa,ya,x_10,s1,s2):
-
+	"""
+	Function to transform the forcing shape from a flat plate to the airfoil surface.
+	This function computes the normal of the airfoil surface and projects b in that direction.
+	xa,ya: coordinates of the point where we want to evaluate b
+	x_10: Position of the actuator (see b(x) equation)
+	s1,s2: Constants of the shape equation
+	"""
 	A = 0.2969
 	B = 0.1260
 	C = 0.3516
@@ -37,3 +43,5 @@ def shape_1(xa,ya,x_10,s1,s2):
 	b = b2(x_10+S, Dy)
 	#print(b)
 	return b
+
+
