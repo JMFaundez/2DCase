@@ -45,8 +45,7 @@ c-----------------------------------------------------------------------
 
       ! Fringe forcing (see usrchk for initialisation)
       frx = 0.0d0; fry = 0.0d0; frz = 0.0d0;
-      if (JP.eq.0) then ! baseflow: fringe to bc file
-      
+	  if (JP.eq.0) then ! baseflow: fringe to bc file
          if (s_fr(ix,iy,iz,iel).ge.1.0d-16) then
             s = s_fr(ix,iy,iz,iel)
             frx = s * (ux_bc(ix,iy,iz,iel) - vx(ix,iy,iz,iel))
@@ -55,7 +54,6 @@ c-----------------------------------------------------------------------
          end if
 
       else ! perturbation: fringe to zero
-         
          if (s_fr(ix,iy,iz,iel).ge.1.0d-16) then
             s = s_fr(ix,iy,iz,iel)
             ixyze = ix + (iy-1)*lpx1 + (iz-1)*lpx1*lpy1
@@ -93,6 +91,7 @@ c-----------------------------------------------------------------------
       include 'SIZE'  ! L[XYZ]1,LELV,NID
       include 'TSTEP' ! ISTEP,IOSTEP
       include 'SOLN'  ! V[XYZ],V[XYZ]P
+      include 'INPUT'
       real*8  ux_bc(lx1,ly1,lz1,lelv),uy_bc(lx1,ly1,lz1,lelv),
      $     uz_bc(lx1,ly1,lz1,lelv),s_fr(lx1,ly1,lz1,lelv)
       COMMON / usrboundc / ux_bc,uy_bc,uz_bc,s_fr
@@ -115,12 +114,17 @@ c-----------------------------------------------------------------------
          
          ! Initialize fringe strength (loaded as temperature field)
          if (nid.eq.0) write(*,*) 'init fringe'
-         call copy(s_fr,t,nx1*ny1*nz1*nelv)
-           
+         if (all(t.eq.0)) write(*,*) ' t empty'
+	 s_fr = 0.0d0
+	 call copy(s_fr,t,nx1*ny1*nz1*nelv)
+         
+  
+         if (all((s_fr).eq.0)) write(*,*) 'fringe  empty'
          ! Initialize control
          !if (nid.eq.0) write(*,*) 'init control'
          !call ctrl_init            
-
+         
+	 IFHEAT = .false.
       end if
 
 
@@ -172,6 +176,7 @@ c-----------------------------------------------------------------------
       ! Save initial condition
       if (istep.eq.0) call outpost(vx,vy,vz,pr,s_fr,'   ')
 
+
       ! Save perturbartion
       if ((npert.ne.0).and.(mod(istep,iostep).eq.0))
      & call outpost(vxp,vyp,vzp,prp,tp,'prt')
@@ -198,21 +203,20 @@ c     NOTE ::: This subroutine MAY NOT be called by every process
       integer iel
       
       iel = gllel(ieg)
-      
+      !write(*,*) 'USERBC 1'
       if (JP.eq.0) then ! baseflow: bc from file
-         
+         !write(*,*) 'USERBC 2'       
          ux = ux_bc(ix,iy,iz,iel)
          uy = uy_bc(ix,iy,iz,iel)
          uz = uz_bc(ix,iy,iz,iel)
          
          if (s_fr(ix,iy,iz,iel).le.-1.0d-16) then ! pressure loaded as negative fringe
-            pa = -s_fr(ix,iy,iz,iel)
-         else
+            pa = s_fr(ix,iy,iz,iel) !Pressure is already negative
+	else
             pa = 0.0d0
          end if
 
       else ! perturbation: homogeneous Dirichlet and homogeneous outflow
-         
          ux = 0.0d0
          uy = 0.0d0
          uz = 0.0d0

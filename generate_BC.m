@@ -7,7 +7,7 @@ gridname = ['mesh_',num2str(mesh_n)];
 %% Load grid
 [xx,yy,ii,uu,vv,pp,fr] = read_grid(gridname); [nely,nelx] = size(xx(2:end,2:end));
 % -- fringe
-stfr = 2/(1.2e-2);
+stfr = 0 %2/(1.2e-2);
 simname = ['mesh_',num2str(mesh_n),'_BC'];
 % -- boundary conditions for each boundary (W: wall, v: Dirichlet, O: Neumann)
 bc{0+1} = 'E'; % no bc for internal nodes

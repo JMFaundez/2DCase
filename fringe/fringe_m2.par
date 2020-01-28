@@ -7,7 +7,7 @@ stopAt = endTime
 endTime = 0.7
 
 variableDT = yes
-targetCFL = 0.5
+targetCFL = 0.6
 timeStepper = bdf2
 
 writeControl = runTime
@@ -26,5 +26,5 @@ density = 1
 viscosity = -5.333333e5
 
 [TEMPERATURE]
-solver = none
-advection = no
+rhoCp = 1.0
+conductivity = 3.45E-4

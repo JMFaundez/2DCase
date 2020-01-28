@@ -12,10 +12,10 @@ plot_stuff = 0;
 curved_el = 0;
 
 % -- number of points for the grid that will be mapped
-nelx = 200; % along the profile
-nely =  40; % normal to the profile
+nelx = 50; % along the profile
+nely =  10; % normal to the profile
 n = 700;
-mesh_number = 2;
+mesh_number = 5;
 
 % Grid
 gridname = ['mesh_',num2str(mesh_number)];
